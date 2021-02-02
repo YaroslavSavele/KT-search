@@ -1,0 +1,116 @@
+const burger = document.querySelector('.burger');
+const menu = document.querySelector('.aside-nav');
+const buttonClose = document.querySelector('.close');
+const activePage = document.querySelector('.active');
+const checkbox = document.querySelectorAll('.checkbox_city');
+const checkbox_users = document.querySelectorAll('.checkbox_user_opt');
+const token = document.querySelector('meta[name="csrf-token"]').content;
+
+if (checkbox.length != 0) {
+    //console.log(checkbox);
+    checkbox.forEach((item) => {
+       console.log(item);
+        item.addEventListener('change', change_checkbox);
+    });
+
+    const checkboxes = document.querySelectorAll('.checkbox');
+    for (let chek of checkboxes) {
+       chek.addEventListener('change', () => {
+          let address = chek.previousElementSibling;
+          address.classList.toggle('bright');
+         
+       });
+    }
+}
+
+if(checkbox_users.length != 0){
+   //console.log(checkbox_users)
+   checkbox_users.forEach((item) => {
+      item.addEventListener('change', change_user_opt);
+   })
+}
+
+function change_user_opt() {
+   id_user_opt = this.getAttribute("data-id");
+   //console.log(id_city);
+   //console.log(this.checked);
+    user_opt_change(id_user_opt, this.checked).then(data => {
+       if(data.status == 'ok'){
+          console.log('Success')
+       } else {
+          console.log('Error')
+       }
+    })
+}
+
+function change_checkbox() {
+   id_city = this.getAttribute("data-id");
+   //console.log(id_city);
+   //console.log(this.checked);
+    address_change(id_city, this.checked).then(data => {
+       if(data.status == 'ok'){
+          console.log('Success')
+       } else {
+          console.log('Error')
+       }
+    })
+}
+
+burger.addEventListener('click', () => {
+    menu
+        .classList
+        .add('is-open');
+});
+
+const close = function () {
+    menu
+        .classList
+        .remove('is-open');
+};
+
+buttonClose.addEventListener('click', () => {
+    close();
+});
+
+activePage.addEventListener('click', (e) => {
+    e.preventDefault();
+    close();
+});
+
+function city_status(id_city, changed){
+   //console.log('id-city = ' + id_city + ' ' + changed)
+   return {
+      id: id_city,
+      flag: changed
+   }
+}
+
+function user_opt_status(id_user_opt, changed){
+   //console.log('id-city = ' + id_city + ' ' + changed)
+   return {
+      id: id_user_opt,
+      flag: changed
+   }
+}
+
+function address_change(id_city, changed){
+   return fetch('/myadminpanel/api/address_change', {
+      method: 'post',
+      headers: {
+         "X-CSRF-Token": token,
+         'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(city_status(id_city, changed))
+   }).then(response => response.json())
+}
+
+function user_opt_change(id_user_opt, changed){
+   return fetch('/myadminpanel/api/user_opt_change', {
+      method: 'post',
+      headers: {
+         "X-CSRF-Token": token,
+         'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(user_opt_status(id_user_opt, changed))
+   }).then(response => response.json())
+}
